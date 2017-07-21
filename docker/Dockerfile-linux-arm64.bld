@@ -1,0 +1,28 @@
+FROM zlim/arm64-ubuntu:14.10
+MAINTAINER mdye@us.ibm.com
+RUN apt-get update && apt-get install -y \
+  build-essential \
+  cmake \
+  curl \
+  libpng12-dev \
+  python \
+  python-pip \
+  gettext \
+  libcurl4-openssl-dev \
+  unzip
+RUN pip install qibuild
+RUN curl https://www.kernel.org/pub/software/scm/git/git-2.9.4.tar.gz | tar zx --transform='s/git-[0-9\.]*/git/' --show-transformed -f - -C /tmp && \
+      cd /tmp/git && \
+      ./configure --prefix=/ --without-tcltk && \
+      make && \
+      make install
+ARG CACHE_DATE=1977-06-27_15:17:32
+RUN git config --global http.postBuffer 1048576000
+RUN git config --global core.compression 0
+RUN git clone --depth 1 --verbose https://github.com/watson-intu/self.git
+WORKDIR /self
+RUN git fetch --unshallow
+RUN git pull --all
+RUN git submodule update --init --recursive
+ADD packages ./packages
+RUN bash -x ./scripts/tc_install.sh linux

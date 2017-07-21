@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage: install_tc.sh.sh <target>  
+# Usage: install_tc.sh.sh <target>
 # Install toolchain for the given target
 
 export TARGET=$1
@@ -7,7 +7,7 @@ export TARGET=$1
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BUILD_DIR=$DIR/..
 PACKAGES_DIR=$BUILD_DIR/packages
-STORE_URL="http://75.126.4.99/xray/?action="
+STORE_URL="http://1dd40.http.tor01.cdn.softlayer.net/intu"
 TC_NAME=$TARGET
 
 TOOLCHAIN=
@@ -36,10 +36,16 @@ fi
 if [ "$TOOLCHAIN" != "" ]; then
 		cd "$PACKAGES_DIR"
 		TOOLCHAIN_ZIP=$TOOLCHAIN.zip
-		echo "Downloading toolchain $TOOLCHAIN_ZIP..."
-		curl "${STORE_URL}/download?packageId=$TOOLCHAIN_ZIP" --output $TOOLCHAIN_ZIP
-		rm -rf $TOOLCHAIN
-		unzip $TOOLCHAIN_ZIP
+
+    if [ ! -d "$TOOLCHAIN" ]; then
+        # pursue download
+        if [ ! -e "$TOOLCHAIN_ZIP" ]; then
+          echo "Downloading toolchain $TOOLCHAIN_ZIP..."
+          curl "/$TOOLCHAIN_ZIP" --output $TOOLCHAIN_ZIP
+        fi
+        unzip $TOOLCHAIN_ZIP
+    fi
+
 		cd "$BUILD_DIR"
 		qitoolchain create $TC_NAME "$PACKAGES_DIR/$TOOLCHAIN/toolchain.xml"
 		if [ $? != 0 ]; then exit 1; fi

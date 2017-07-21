@@ -23,8 +23,11 @@ mkdir -p "$STAGE_DIR"
 cp -R "$DIR/../etc" "$STAGE_DIR/"
 
 # update the version number in all the profiles
-find $STAGE_DIR/etc/shared/profiles/ -name 'body.json' | xargs sed -i '.bak' "s/\"0.0.0\"/\"$VERSION\"/g" 
-find $STAGE_DIR/etc/shared/profiles/ -name 'body.json.bak' | xargs rm
+pdir=$STAGE_DIR/etc/shared/profiles
+if [ -d "$pdir" ]; then
+  # only way to get compat w/ mac os x
+  find $pdir -name 'body.json' -print0 | xargs --null -I% sh -c "sed -i.old -e "s/\"0.0.0\"/\"$VERSION\"/g" % && rm %.old"
+fi
 
 if [ -d "$BIN_DIR" ]; then
 	echo "Staging bins.."
